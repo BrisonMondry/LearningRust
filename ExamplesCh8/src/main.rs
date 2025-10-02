@@ -3,7 +3,7 @@
 fn main() {
     println!("----------------------------");
     println!("Example problems from Chapter 8 of the Rust book");
-    let (med, mode) = med_mode::run(&[1, 1, 3, 3].to_vec());
+    let (med, mode) = med_mode::run(&[1, 1, 3].to_vec());
     println!("Median: {}, Mode: {:?}", med, mode);
     println!("----------------------------");
 }
@@ -47,12 +47,9 @@ mod med_mode {
                 median = value as f32;
                 return (median, mode);
             }
-
             med_count += count;
-            if med_count == midpoint -1 && numbers.len() % 2 == 0 {
-                avg = true;
-            }
-            if med_count >= midpoint && !found_median {
+
+            if med_count -1 >= midpoint && !found_median {
                 if avg {
                     median = (value + trailing_med) as f32 / 2.0;
                     found_median = true;
@@ -63,6 +60,10 @@ mod med_mode {
                 }
             }
             trailing_med = value;
+
+            if med_count == midpoint && numbers.len() % 2 == 0 {
+                avg = true;
+            }
 
             if count > mode_count {
                 mode.clear();
