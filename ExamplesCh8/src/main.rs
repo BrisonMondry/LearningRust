@@ -8,31 +8,38 @@ fn main() {
     println!("----------------------------");
 }
 
+// Module to calculate median and mode of a list of numbers
+// Separated into modules to organize in terms of book examples
+// This is more complicated than it needs to be for the sake of 
+// pushing myself to use more Rust, and not just to use std lib functions
 mod med_mode {
     use std::collections::BTreeMap;
 
     pub fn run(numbers: &Vec<usize>) -> (f32, Vec<usize>) {
+        //edge case 1: empty list
         if numbers.len() == 0 {
             println!("No mode or median for empty list");
             return (f32::NAN, vec![]);
         }
         
+        //initilize return values
         let mut mode: Vec<usize> = [].to_vec();
         let mut median: f32 = f32::NAN;
 
+        //edge case 2: list of one number
         if numbers.len() == 1 {
             mode.push(numbers[0]);
             median = numbers[0] as f32;
             return (median, mode);
         }
 
+        //count occurrences
         let mut occurrences: BTreeMap<usize, usize> = BTreeMap::new();
         for value in numbers {
             let count = occurrences.entry(*value).or_insert(0);
             *count += 1;
         }
 
-        
         let mut mode_count = 0;
 
         let midpoint = numbers.len() / 2;
@@ -41,6 +48,7 @@ mod med_mode {
         let mut found_median = false;
         let mut avg = false;
 
+        //calculate median
         for (&value, &count) in &occurrences {
             if count == numbers.len() {
                 mode.push(value);
@@ -65,6 +73,7 @@ mod med_mode {
                 avg = true;
             }
 
+            //calculate mode
             if count > mode_count {
                 mode.clear();
                 mode.push(value);
