@@ -5,7 +5,8 @@ fn main() {
     println!("Median: {}, Mode: {:?}", med, mode);
     let pig_latin = igpay_atinlay::run("Hello, world!😃\nThis is an example.");
     println!("Pig Latin: {}", pig_latin);
-    println!("----------------------------");
+    hr_people_dictionary::run();
+    println!("Done");
 }
 
 // Module to calculate median and mode of a list of numbers
@@ -145,32 +146,68 @@ mod hr_people_dictionary {
     use std::collections::HashMap;
     use std::io;
 
-    // store employee names under their department in a HashMap
-    let mut company: HashMap<String, Vec<String>> = HashMap::new();
-
     pub fn run() {
+        // store employee names under their department in a HashMap
+        let mut company: HashMap<String, Vec<String>> = HashMap::new();
+
         loop {
-            let line = io::stdin.read_line().expect("Failed to read line");
-            let parts: Vec<&str> = line.trim().split_whitespace().collect();
-            let mut name = String::new();
-            let mut department = String::new();
-            if parts[0] == String::from("help") {
+            let mut buffer = String::new();
+
+            let stdin = io::stdin();
+            stdin.read_line(&mut buffer).expect("Failed to read line");
+            let parts: Vec<&str> = buffer.split_whitespace().collect();
+            if parts.len() == 0 {
+                println!("Invalid command. Type 'help' for instructions.");
+                continue;
+            }
+            
+            if parts[0].eq_ignore_ascii_case("help") {
                 println!("To add an employee to a department, use the following format:");
                 println!("Add <employee_name> to <department_name>");
                 println!("To see all employees in a department, use the following format:");
-                println!("<department_name>");
+                println!("print <department_name>");
                 println!("To see all employees in the company, use the following format:");
-                println!("All");
+                println!("print All");
                 println!("To exit the program, type 'exit'");
-            } else if parts[0] == String::from("exit") {
+            } else if parts[0].eq_ignore_ascii_case("exit") {
                 break;
-            } else if parts[0] == String::from("Add") {
-               let i = parts.iter().position(|&r| r == "to");
-               if i.is_none() || i.unwrap() < 2 || i.unwrap() >= parts.len() - 1 {
+            } else if parts[0].eq_ignore_ascii_case("Add") {
+                let i = parts.iter().position(|&r| r.eq_ignore_ascii_case("to"));
+                if i.is_none() || i.unwrap() < 2 || i.unwrap() >= parts.len() - 1 {
                    println!("Invalid command. Type 'help' for instructions.");
                    continue;
-               }
-            } else {
+                }
+                let i = i.unwrap();
+                let name = parts[1..i].join(" ");
+                let department = parts[i + 1..].join(" ");
+                let entry = company.entry(department).or_insert(vec![]);
+                entry.push(name);
+                entry.sort();
+            }else if parts[0].eq_ignore_ascii_case("Print"){
+                if parts.len() != 2 {
+                    println!("Invalid command. Type 'help' for instructions.");
+                    continue;
+                }
+                let department = parts[1].to_string();
+                if department == "all" {
+                    let mut message = String::new();
+                    let mut departments: Vec<&String> = company.keys().collect();
+                    departments.sort();
+                    for dept in departments {
+                        let mut employees = company.get(dept).unwrap().clone();
+                        employees.sort();
+                        message.push_str(&format!("{}:\n{}\n- - - - -\n", dept, employees.join("\n")));
+                    println!("{}", message);
+                }
+                } else {
+                    if let Some(employees) = company.get(&department) {
+                        println!("{}:\n{}", department, employees.join("\n"));
+                    } else {
+                        println!("No such department: {}", department);
+                    }
+                }
+            } 
+            else {
                 println!("Invalid command. Type 'help' for instructions.");
             }
         }
